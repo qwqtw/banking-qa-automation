@@ -47,3 +47,34 @@ test.describe('Banking API tests', () => {
   });
 
 });
+
+test('transfer creates a transaction record @api @regression', async ({ request }) => {
+
+  const transferResponse = await request.post(
+    'http://localhost:3001/transfers',
+    {
+      data: {
+        accountId: 1,
+        amount: 50
+      }
+    }
+  );
+
+  expect(transferResponse.status()).toBe(201);
+
+  const transactionsResponse = await request.get(
+    'http://localhost:3001/transactions'
+  );
+
+  expect(transactionsResponse.status()).toBe(200);
+
+  const transactions = await transactionsResponse.json();
+
+  expect(transactions.length).toBeGreaterThan(0);
+
+  const latestTransaction = transactions[transactions.length - 1];
+
+  expect(latestTransaction.accountId).toBe(1);
+  expect(latestTransaction.amount).toBe(50);
+  expect(latestTransaction.type).toBe('debit');
+});
