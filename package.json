@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "api": "tsx mock-api/server.ts"
-  },
+  "api": "tsx mock-api/server.ts",
+  "test:e2e": "playwright test",
+  "test:smoke": "playwright test --grep @smoke",
+  "test:regression": "playwright test --grep @regression",
+  "test:api": "playwright test --project=api",
+  "test:a11y": "playwright test --project=accessibility"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
