@@ -110,3 +110,59 @@ test.describe('Banking transfer workflow', () => {
   );
 
 });
+
+test(
+  'transfer fails when balance is insufficient @regression',
+  async ({ page, request }, testInfo) => {
+
+    const bankingPage = new BankingPage(page);
+
+    const accountMap: Record<string, number> = {
+      chromium: 1,
+      firefox: 2,
+      webkit: 3
+    };
+
+    const accountId = accountMap[testInfo.project.name];
+
+    await request.post(
+      `http://localhost:3001/test/reset/${accountId}`
+    );
+
+    await bankingPage.goto(accountId);
+
+    await bankingPage.transfer(5000);
+
+    await expect(
+      page.getByTestId('transfer-message')
+    ).toHaveText('Insufficient funds');
+  }
+);
+
+test(
+  'transfer fails for invalid amount @regression',
+  async ({ page, request }, testInfo) => {
+
+    const bankingPage = new BankingPage(page);
+
+    const accountMap: Record<string, number> = {
+      chromium: 1,
+      firefox: 2,
+      webkit: 3
+    };
+
+    const accountId = accountMap[testInfo.project.name];
+
+    await request.post(
+      `http://localhost:3001/test/reset/${accountId}`
+    );
+
+    await bankingPage.goto(accountId);
+
+    await bankingPage.transfer(-100);
+
+    await expect(
+      page.getByTestId('transfer-message')
+    ).toHaveText('Invalid transfer amount');
+  }
+);

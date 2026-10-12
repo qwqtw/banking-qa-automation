@@ -42,5 +42,12 @@ export default defineConfig({
       name: 'api',
       testMatch: /api\/.*\.spec\.ts/,
     },
+    {
+  name: 'accessibility',
+  testMatch: '**/accessibility/**/*.spec.ts',
+  use: {
+    ...devices['Desktop Chrome']
+  }
+},
   ],
 });
