@@ -50,4 +50,19 @@ export default defineConfig({
   }
 },
   ],
+  
+  webServer: [
+  {
+    command: 'npm run api',
+    url: 'http://localhost:3001/accounts/1',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+  {
+    command: 'npm run dev --prefix banking-ui -- --host 0.0.0.0',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+],
 });

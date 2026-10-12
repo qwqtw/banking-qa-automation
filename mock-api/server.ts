@@ -139,3 +139,22 @@ app.post('/test/reset/:id', (req, res) => {
     message: `Account ${accountId} reset successfully`
   });
 });
+
+let nextAccountId = 100;
+
+app.post('/test/accounts', (req, res) => {
+  const {
+    owner = 'Automation Test User',
+    balance = 1000
+  } = req.body;
+
+  const account = {
+    id: nextAccountId++,
+    owner,
+    balance
+  };
+
+  accounts.push(account);
+
+  res.status(201).json(account);
+});
