@@ -1,0 +1,6 @@
+node_modules
+banking-ui/node_modules
+playwright-report
+test-results
+.git
+.github
