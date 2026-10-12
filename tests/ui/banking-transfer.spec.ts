@@ -2,6 +2,14 @@ import { test, expect } from '@playwright/test';
 import { BankingPage } from '../../pages/BankingPage';
 
 test.describe('Banking transfer workflow', () => {
+    
+    test.beforeEach(async ({ request }) => {
+    const resetResponse = await request.post(
+      'http://localhost:3001/test/reset'
+    );
+
+    expect(resetResponse.status()).toBe(200);
+  });
 
   test('user transfer updates UI and backend state @e2e @smoke', async ({
     page,
