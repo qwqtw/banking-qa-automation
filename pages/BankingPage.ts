@@ -19,9 +19,11 @@ export class BankingPage {
     this.transactionList = page.getByTestId('transaction-list');
   }
 
-  async goto() {
-    await this.page.goto('http://localhost:5173');
-  }
+  async goto(accountId: number) {
+  await this.page.goto(
+    `http://localhost:5173?accountId=${accountId}`
+  );
+}
 
   async transfer(amount: number) {
     await this.transferAmountInput.fill(String(amount));

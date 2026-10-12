@@ -14,22 +14,36 @@ type Transaction = {
 };
 
 function App() {
+  const params = new URLSearchParams(window.location.search);
+
+const accountId =
+  Number(params.get('accountId')) || 1;
+  
   const [account, setAccount] = useState<Account | null>(null);
   const [amount, setAmount] = useState('');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [message, setMessage] = useState('');
 
   const loadAccount = async () => {
-    const response = await fetch('http://localhost:3001/accounts/1');
+    const response = await fetch(`http://localhost:3001/accounts/${accountId}`);
     const data = await response.json();
     setAccount(data);
   };
 
   const loadTransactions = async () => {
-    const response = await fetch('http://localhost:3001/transactions');
-    const data = await response.json();
-    setTransactions(data);
-  };
+  const response = await fetch(
+    'http://localhost:3001/transactions'
+  );
+
+  const data = await response.json();
+
+  const accountTransactions = data.filter(
+    (transaction: Transaction) =>
+      transaction.accountId === accountId
+  );
+
+  setTransactions(accountTransactions);
+};
 
   useEffect(() => {
     loadAccount();
@@ -47,7 +61,7 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        accountId: 1,
+        accountId,
         amount: numericAmount,
       }),
     });

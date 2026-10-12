@@ -2,82 +2,111 @@ import { test, expect } from '@playwright/test';
 import { BankingPage } from '../../pages/BankingPage';
 
 test.describe('Banking transfer workflow', () => {
-    
-    test.beforeEach(async ({ request }) => {
-    const resetResponse = await request.post(
-      'http://localhost:3001/test/reset'
-    );
 
-    expect(resetResponse.status()).toBe(200);
-  });
+  test(
+    'user transfer updates UI and backend state @e2e @smoke',
+    async ({ page, request }, testInfo) => {
 
-  test('user transfer updates UI and backend state @e2e @smoke', async ({
-    page,
-    request
-  }) => {
+      const bankingPage = new BankingPage(page);
 
-    const bankingPage = new BankingPage(page);
+      const accountMap: Record<string, number> = {
+        chromium: 1,
+        firefox: 2,
+        webkit: 3
+      };
 
-    // 1. Read initial backend state
-    const beforeResponse = await request.get(
-      'http://localhost:3001/accounts/1'
-    );
+      const accountId =
+        accountMap[testInfo.project.name];
 
-    expect(beforeResponse.status()).toBe(200);
+      expect(accountId).toBeTruthy();
 
-    const beforeAccount = await beforeResponse.json();
+      // 1. Reset only this browser's account
+      const resetResponse = await request.post(
+        `http://localhost:3001/test/reset/${accountId}`
+      );
 
-    const initialBalance = beforeAccount.balance;
+      expect(resetResponse.status()).toBe(200);
 
-    const transferAmount = 100;
+      // 2. Get initial backend state
+      const beforeResponse = await request.get(
+        `http://localhost:3001/accounts/${accountId}`
+      );
 
-    // 2. Open banking UI
-    await bankingPage.goto();
+      expect(beforeResponse.status()).toBe(200);
 
-    await bankingPage.verifyBalance(initialBalance);
+      const beforeAccount =
+        await beforeResponse.json();
 
-    // 3. Perform transfer through UI
-    await bankingPage.transfer(transferAmount);
+      const initialBalance =
+        beforeAccount.balance;
 
-    await bankingPage.verifyTransferSuccessful();
+      const transferAmount = 100;
 
-    // 4. Verify UI state
-    const expectedBalance = initialBalance - transferAmount;
+      // 3. Open isolated banking account
+      await bankingPage.goto(accountId);
 
-    await bankingPage.verifyBalance(expectedBalance);
+      await bankingPage.verifyBalance(
+        initialBalance
+      );
 
-    await bankingPage.verifyTransactionVisible(
-      transferAmount
-    );
+      // 4. Perform transfer through UI
+      await bankingPage.transfer(
+        transferAmount
+      );
 
-    // 5. Verify backend state through API
-    const afterResponse = await request.get(
-      'http://localhost:3001/accounts/1'
-    );
+      await bankingPage
+        .verifyTransferSuccessful();
 
-    expect(afterResponse.status()).toBe(200);
+      // 5. Verify UI state
+      const expectedBalance =
+        initialBalance - transferAmount;
 
-    const afterAccount = await afterResponse.json();
+      await bankingPage.verifyBalance(
+        expectedBalance
+      );
 
-    expect(afterAccount.balance)
-      .toBe(expectedBalance);
+      await bankingPage
+        .verifyTransactionVisible(
+          transferAmount
+        );
 
-    // 6. Verify backend transaction
-    const transactionsResponse = await request.get(
-      'http://localhost:3001/transactions'
-    );
+      // 6. Verify backend account state
+      const afterResponse = await request.get(
+        `http://localhost:3001/accounts/${accountId}`
+      );
 
-    expect(transactionsResponse.status()).toBe(200);
+      expect(afterResponse.status()).toBe(200);
 
-    const transactions = await transactionsResponse.json();
+      const afterAccount =
+        await afterResponse.json();
 
-    const matchingTransaction = transactions.find(
-      (transaction: any) =>
-        transaction.accountId === 1 &&
-        transaction.amount === transferAmount
-    );
+      expect(afterAccount.balance)
+        .toBe(expectedBalance);
 
-    expect(matchingTransaction).toBeTruthy();
-  });
+      // 7. Verify backend transaction
+      const transactionsResponse =
+        await request.get(
+          'http://localhost:3001/transactions'
+        );
+
+      expect(
+        transactionsResponse.status()
+      ).toBe(200);
+
+      const transactions =
+        await transactionsResponse.json();
+
+      const matchingTransaction =
+        transactions.find(
+          (transaction: any) =>
+            transaction.accountId === accountId &&
+            transaction.amount === transferAmount
+        );
+
+      expect(
+        matchingTransaction
+      ).toBeTruthy();
+    }
+  );
 
 });
