@@ -8,7 +8,7 @@ steps:
     entrypoint: 'npm'
     args: ['ci']
 
-  - name: 'mcr.microsoft.com/playwright:v1.55.0-noble'
+  - name: 'mcr.microsoft.com/playwright:v1.64.0-noble'
     entrypoint: 'bash'
     args:
       - '-c'
