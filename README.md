@@ -13,13 +13,13 @@ The framework demonstrates scalable test automation practices including cross-br
 - REST APIs
 - GitHub Actions
 - Google Cloud Build
-- Docker
 - axe-core
-- HTML Test Reporting
+- Playwright HTML Reporting
 
 ## Test Coverage
 
 ### UI Automation
+
 - Banking dashboard validation
 - Account balance verification
 - Fund transfer workflow
@@ -28,6 +28,7 @@ The framework demonstrates scalable test automation practices including cross-br
 - Invalid transfer amount validation
 
 ### API Automation
+
 - GET account details
 - POST fund transfers
 - GET transaction history
@@ -60,3 +61,189 @@ Example:
 Chromium test  -> Account 100
 Firefox test   -> Account 101
 WebKit test    -> Account 102
+```
+
+## Cross-Browser Testing
+
+UI tests execute across:
+
+- Chromium
+- Firefox
+- WebKit
+
+API tests run in a dedicated Playwright API project without unnecessary browser execution.
+
+## Accessibility Testing
+
+Accessibility checks are implemented using:
+
+- `@axe-core/playwright`
+- WCAG 2.0 A
+- WCAG 2.0 AA
+
+The suite checks for serious and critical accessibility violations.
+
+## Project Structure
+
+```text
+banking-qa-automation/
+│
+├── banking-ui/
+│   └── React banking application
+│
+├── mock-api/
+│   └── Express banking REST API
+│
+├── pages/
+│   ├── BankingPage.ts
+│   ├── CartPage.ts
+│   ├── InventoryPage.ts
+│   └── LoginPage.ts
+│
+├── tests/
+│   ├── ui/
+│   ├── api/
+│   └── accessibility/
+│
+├── utils/
+│   └── testData.ts
+│
+├── .github/
+│   └── workflows/
+│       └── playwright.yml
+│
+├── playwright.config.ts
+├── cloudbuild.yaml
+└── package.json
+```
+
+## Test Tags
+
+Tests are organized using tags:
+
+```text
+@smoke
+@regression
+@api
+@e2e
+@a11y
+```
+
+Examples:
+
+```bash
+npm run test:smoke
+npm run test:regression
+npm run test:api
+npm run test:a11y
+```
+
+## Running Tests
+
+Install root dependencies:
+
+```bash
+npm install
+```
+
+Install banking UI dependencies:
+
+```bash
+cd banking-ui
+npm install
+cd ..
+```
+
+Install Playwright browsers:
+
+```bash
+npx playwright install
+```
+
+Run the complete suite:
+
+```bash
+npx playwright test
+```
+
+Run smoke tests:
+
+```bash
+npm run test:smoke
+```
+
+Run regression tests:
+
+```bash
+npm run test:regression
+```
+
+Run API tests:
+
+```bash
+npm run test:api
+```
+
+Run accessibility tests:
+
+```bash
+npm run test:a11y
+```
+
+Open the HTML report:
+
+```bash
+npx playwright show-report
+```
+
+## Automated Test Reporting
+
+Playwright is configured to retain diagnostic artifacts for failed tests:
+
+- Screenshots
+- Video
+- Trace files
+- HTML reports
+
+These artifacts support test failure analysis and troubleshooting.
+
+## CI/CD
+
+### GitHub Actions
+
+The automated test suite runs on:
+
+- Pushes to `main`
+- Pull requests targeting `main`
+
+The GitHub Actions workflow:
+
+1. Checks out the repository
+2. Sets up Node.js
+3. Installs root dependencies
+4. Installs banking UI dependencies
+5. Installs Playwright browsers
+6. Starts the required application services
+7. Executes the Playwright test suite
+8. Uploads the Playwright HTML report as a workflow artifact
+
+### Google Cloud Build
+
+A `cloudbuild.yaml` configuration is included for running the Playwright automation suite in Google Cloud Build.
+
+## Quality Engineering Practices Demonstrated
+
+This project demonstrates:
+
+- Reusable Page Object Model design
+- UI and REST API automation
+- Hybrid UI/API end-to-end testing
+- Positive and negative testing
+- Smoke and regression suites
+- Cross-browser testing
+- Parallel test execution
+- Parallel-safe test-data isolation
+- Dynamic API-driven test-data provisioning
+- Accessibility testing
+- Failure diagnostics
+- CI/CD integration
