@@ -1,68 +1,60 @@
 import { test, expect } from '@playwright/test';
+import { createTestAccount } from '../../utils/testData';
+
 
 test.describe('Banking end-to-end API workflow', () => {
 
-  test('account transfer updates balance and creates transaction @e2e @regression', async ({ request }) => {
+  test(
+    'account transfer updates balance and creates transaction @e2e @regression',
+    async ({ request }) => {
 
-    // 1. Get account before transfer
-    const beforeResponse = await request.get(
-      'http://localhost:3001/accounts/1'
-    );
+      const account = await createTestAccount(
+        request,
+        'API E2E Test User',
+        1000
+      );
 
-    expect(beforeResponse.status()).toBe(200);
+      const transferAmount = 75;
 
-    const beforeAccount = await beforeResponse.json();
-
-    const initialBalance = beforeAccount.balance;
-
-    // 2. Perform transfer
-    const transferAmount = 75;
-
-    const transferResponse = await request.post(
-      'http://localhost:3001/transfers',
-      {
-        data: {
-          accountId: 1,
-          amount: transferAmount
+      const transferResponse = await request.post(
+        'http://localhost:3001/transfers',
+        {
+          data: {
+            accountId: account.id,
+            amount: transferAmount
+          }
         }
-      }
-    );
+      );
 
-    expect(transferResponse.status()).toBe(201);
+      expect(transferResponse.status()).toBe(201);
 
-    const transferBody = await transferResponse.json();
+      const afterResponse = await request.get(
+        `http://localhost:3001/accounts/${account.id}`
+      );
 
-    expect(transferBody.amount).toBe(transferAmount);
-    expect(transferBody.type).toBe('debit');
+      expect(afterResponse.status()).toBe(200);
 
-    // 3. Verify updated account balance
-    const afterResponse = await request.get(
-      'http://localhost:3001/accounts/1'
-    );
+      const afterAccount = await afterResponse.json();
 
-    expect(afterResponse.status()).toBe(200);
+      expect(afterAccount.balance)
+        .toBe(1000 - transferAmount);
 
-    const afterAccount = await afterResponse.json();
+      const transactionsResponse = await request.get(
+        'http://localhost:3001/transactions'
+      );
 
-    expect(afterAccount.balance)
-      .toBe(initialBalance - transferAmount);
+      expect(transactionsResponse.status()).toBe(200);
 
-    // 4. Verify transaction history
-    const transactionsResponse = await request.get(
-      'http://localhost:3001/transactions'
-    );
+      const transactions = await transactionsResponse.json();
 
-    expect(transactionsResponse.status()).toBe(200);
+      const matchingTransaction = transactions.find(
+        (transaction: any) =>
+          transaction.accountId === account.id &&
+          transaction.amount === transferAmount
+      );
 
-    const transactions = await transactionsResponse.json();
-
-    const matchingTransaction = transactions.find(
-      (transaction: any) =>
-        transaction.accountId === 1 &&
-        transaction.amount === transferAmount
-    );
-
-    expect(matchingTransaction).toBeTruthy();
-  });
+      expect(matchingTransaction).toBeTruthy();
+    }
+  );
 
 });

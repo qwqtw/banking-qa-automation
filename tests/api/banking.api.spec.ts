@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { createTestAccount } from '../../utils/testData';
+
 
 test.describe('Banking API tests', () => {
 
@@ -17,34 +19,34 @@ test.describe('Banking API tests', () => {
 });
 
   test('POST transfer updates account balance @api @regression', async ({ request }) => {
-    const beforeResponse = await request.get(
-      'http://localhost:3001/accounts/1'
-    );
+  const account = await createTestAccount(
+    request,
+    'API Transfer Test User',
+    1000
+  );
 
-    expect(beforeResponse.status()).toBe(200);
-
-    const before = await beforeResponse.json();
-
-    const transferResponse = await request.post(
-      'http://localhost:3001/transfers',
-      {
-        data: {
-          accountId: 1,
-          amount: 100
-        }
+  const transferResponse = await request.post(
+    'http://localhost:3001/transfers',
+    {
+      data: {
+        accountId: account.id,
+        amount: 100
       }
-    );
+    }
+  );
 
-    expect(transferResponse.status()).toBe(201);
+  expect(transferResponse.status()).toBe(201);
 
-    const afterResponse = await request.get(
-      'http://localhost:3001/accounts/1'
-    );
+  const afterResponse = await request.get(
+    `http://localhost:3001/accounts/${account.id}`
+  );
 
-    const after = await afterResponse.json();
+  expect(afterResponse.status()).toBe(200);
 
-    expect(after.balance).toBe(before.balance - 100);
-  });
+  const after = await afterResponse.json();
+
+  expect(after.balance).toBe(900);
+});
 
 });
 
