@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-  "api": "tsx mock-api/server.ts"
+    "api": "tsx mock-api/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -12,12 +12,14 @@
   "description": "",
   "devDependencies": {
     "@playwright/test": "^1.64.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.23.15"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "express": "^5.3.0"
   }
 }

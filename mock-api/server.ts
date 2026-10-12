@@ -1,7 +1,9 @@
 import express from 'express';
+import cors from 'cors';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 let accounts = [
@@ -69,6 +71,22 @@ app.post('/transfers', (req, res) => {
 
 app.get('/transactions', (_req, res) => {
   res.json(transactions);
+});
+
+app.post('/test/reset', (_req, res) => {
+  accounts = [
+    {
+      id: 1,
+      owner: 'Autumn Wang',
+      balance: 1000
+    }
+  ];
+
+  transactions = [];
+
+  res.status(200).json({
+    message: 'Test data reset successfully'
+  });
 });
 
 app.listen(3001, () => {
